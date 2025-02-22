@@ -3,18 +3,20 @@ import sys
 from PyQt6 import uic
 from PyQt6.QtWidgets import QApplication, QMessageBox
 from PyQt6.QtWidgets import QMainWindow, QTableWidgetItem, QWidget
+from mainUI import Ui_MainWindow
+from addEditCoffeeForm import Ui_Form
 
 
-class AddEdit(QWidget):
+class AddEdit(QWidget, Ui_Form):
     def __init__(self):
         super().__init__()
-        uic.loadUi('addEditCoffeeForm.ui', self)
+        self.setupUi(self)
         self.pushButton.clicked.connect(self.update_result)
         self.saveButton.clicked.connect(self.save_results)
         self.set_row.clicked.connect(self.new)
 
     def update_result(self):
-        self.con = sqlite3.connect("coffee.sqlite")
+        self.con = sqlite3.connect("data/coffee.sqlite")
         cur = self.con.cursor()
         result = cur.execute(f"SELECT * FROM info WHERE {self.textEdit.toPlainText()}").fetchall()
         self.con.close()
@@ -35,7 +37,7 @@ class AddEdit(QWidget):
         msg.show()
         res = msg.exec()
         if res == msg.StandardButton.Yes:
-            self.con = sqlite3.connect("coffee.sqlite")
+            self.con = sqlite3.connect("data/coffee.sqlite")
             cur = self.con.cursor()
             cur.execute(f"DELETE FROM info WHERE id = {self.tableWidget.item(row, 0).text()}")
 
@@ -45,7 +47,7 @@ class AddEdit(QWidget):
             self.con.close()
 
     def new(self):
-        self.con = sqlite3.connect("coffee.sqlite")
+        self.con = sqlite3.connect("data/coffee.sqlite")
         cur = self.con.cursor()
         cur.execute("""INSERT INTO info ('Название_сорта', 'Степень_обжарки', 'Молотый_или_в_зернах', 'Описание_вкуса', 'Цена', 'Объем_упаковки') VALUES (?, ?, ?, ?, ?, ?)""", (self.lineEdit.text(),
                                                                           self.lineEdit_2.text(), self.lineEdit_3.text(),
@@ -56,17 +58,17 @@ class AddEdit(QWidget):
 
 
 
-class MyWidget(QMainWindow):
+class MyWidget(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
-        uic.loadUi('main.ui', self)
+        self.setupUi(self)
         self.create1.clicked.connect(self.click)
         self.refactor.clicked.connect(self.click)
         self.update.clicked.connect(self.update_result)
         self.update_result()
 
     def update_result(self):
-        self.con = sqlite3.connect("coffee.sqlite")
+        self.con = sqlite3.connect("data/coffee.sqlite")
         cur = self.con.cursor()
         result = cur.execute(f"SELECT * FROM info").fetchall()
         self.con.close()
